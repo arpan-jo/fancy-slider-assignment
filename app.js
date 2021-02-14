@@ -138,6 +138,7 @@ searchEnter.addEventListener('keyup', function (event) {
 });
 searchBtn.addEventListener('click', function () {
     showImage();
+    document.getElementById('selected').innerText = '0';
 });
 
 sliderBtn.addEventListener('click', function () {
