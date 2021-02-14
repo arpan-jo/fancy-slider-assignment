@@ -5,6 +5,7 @@ const searchBtn = document.getElementById('search-btn');
 const sliderBtn = document.getElementById('create-slider');
 const searchEnter = document.getElementById('search');
 const sliderContainer = document.getElementById('sliders');
+const duration = document.getElementById('duration');
 // selected image
 let sliders = [];
 
@@ -22,12 +23,16 @@ const showImages = images => {
     images.forEach(image => {
         let div = document.createElement('div');
         div.className = 'col-lg-3 col-md-4 col-xs-6 img-item mb-2';
-        div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
+        div.innerHTML = ` 
+        <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">
+        <p>${image.tags}</p>`;
         gallery.appendChild(div);
     });
+    spinner(false);
 };
 
 const getImages = query => {
+    spinner(true);
     fetch(
         `https://pixabay.com/api/?key=${KEY}=${query}&image_type=photo&pretty=true`
     )
@@ -36,15 +41,18 @@ const getImages = query => {
         .catch(err => console.log(err));
 };
 
+// check this before submit
 let slideIndex = 0;
 const selectItem = (event, img) => {
     let element = event.target;
-    element.classList.toggle('added');
-
+    const toggleCount = element.classList.toggle('added');
     let item = sliders.indexOf(img);
-    if (item === -1) {
+    if (item !== -1) {
+        sliders.splice(item, 1);
+    } else {
         sliders.push(img);
     }
+    countSlide(toggleCount);
 };
 
 let timer = 0;
@@ -52,11 +60,14 @@ const createSlider = () => {
     // check slider image length
     if (sliders.length < 2) {
         alert('Select at least 2 image');
-    }
-    if (document.getElementById('duration').value < 0) {
-        alert('Enter positive value');
         return;
     }
+    if (duration.value < 0) {
+        alert('Enter minimun value 1 second');
+        duration.value = '';
+        return;
+    }
+
     // create slider previous next area
     sliderContainer.innerHTML = '';
     const prevNext = document.createElement('div');
@@ -71,7 +82,7 @@ const createSlider = () => {
     document.querySelector('.main').style.display = 'block';
     // hide image aria
     imagesArea.style.display = 'none';
-    const duration = document.getElementById('duration').value || 1000;
+    const durationTime = duration.value || 1000;
     sliders.forEach(slide => {
         let item = document.createElement('div');
         item.className = 'slider-item';
@@ -84,7 +95,7 @@ const createSlider = () => {
     timer = setInterval(function () {
         slideIndex++;
         changeSlide(slideIndex);
-    }, duration);
+    }, durationTime);
 };
 
 // change slider index
@@ -120,8 +131,8 @@ const showImage = () => {
     getImages(search.value);
     sliders.length = 0;
 };
-searchEnter.addEventListener('keyup', function (e) {
-    if (e.which === 13) {
+searchEnter.addEventListener('keyup', function (event) {
+    if (event.which === 13) {
         showImage();
     }
 });
@@ -132,3 +143,23 @@ searchBtn.addEventListener('click', function () {
 sliderBtn.addEventListener('click', function () {
     createSlider();
 });
+
+const spinner = showSpin => {
+    const spinner = document.getElementById('spinner');
+    if (showSpin) {
+        spinner.classList.remove('d-none');
+    } else {
+        spinner.classList.add('d-none');
+    }
+};
+
+// for counting selected slider image
+const countSlide = isTrue => {
+    const count = document.getElementById('selected').innerText;
+    let slideCount = parseInt(count);
+    if (isTrue) {
+        document.getElementById('selected').innerText = slideCount + 1;
+    } else {
+        document.getElementById('selected').innerText = slideCount - 1;
+    }
+};
