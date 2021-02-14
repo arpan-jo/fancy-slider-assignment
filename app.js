@@ -60,6 +60,7 @@ const createSlider = () => {
     // check slider image length
     if (sliders.length < 2) {
         alert('Select at least 2 image');
+        duration.value = '';
         return;
     }
     if (duration.value < 0) {
